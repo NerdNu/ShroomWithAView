@@ -123,9 +123,9 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         Material newBlockType = block.getType();
         byte newData = -1;
         if (colour == DyeColor.WHITE) {
-            if (axisFace == AxisFace.UP || axisFace == AxisFace.DOWN) {
+            if (axisFace == AxisFace.UP || axisFace == AxisFace.DOWN || player.isSneaking()) {
                 newData = MushroomBlockTexture.ALL_STEM.getData();
-            } else if (currentTexture != MushroomBlockTexture.ALL_STEM || player.isSneaking()) {
+            } else if (currentTexture != MushroomBlockTexture.ALL_STEM) {
                 newData = MushroomBlockTexture.STEM_SIDES.getData();
             }
         } else {
