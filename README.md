@@ -1,4 +1,4 @@
-ShroomWtihAView
+ShroomWithAView
 ===============
 A Bukkit plugin that allows players to edit huge mushroom block face textures
 with dyes.
