@@ -4,7 +4,7 @@
 	<groupId>nu.nerd</groupId>
 	<name>ShroomWithAView</name>
 	<artifactId>${project.name}</artifactId>
-	<version>1.0.1</version>
+	<version>1.1.0</version>
 	<packaging>jar</packaging>
 	<description>Allow players to edit huge mushroom block face textures with dyes.</description>
 	<url>https://github.com/totemo/${project.name}</url>

@@ -20,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -123,29 +124,29 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         Material newBlockType = block.getType();
         byte newData = -1;
         if (colour == DyeColor.WHITE) {
-            if (axisFace == AxisFace.UP || axisFace == AxisFace.DOWN || player.isSneaking()) {
+            if ((axisFace == AxisFace.UP || axisFace == AxisFace.DOWN || player.isSneaking()) &&
+                currentTexture != ALL_STEM) {
                 newData = MushroomBlockTexture.ALL_STEM.getData();
-            } else if (currentTexture != MushroomBlockTexture.ALL_STEM) {
+            } else if (currentTexture != MushroomBlockTexture.ALL_STEM &&
+                       currentTexture != MushroomBlockTexture.STEM_SIDES) {
                 newData = MushroomBlockTexture.STEM_SIDES.getData();
             }
-        } else {
-            if (colour == DyeColor.YELLOW) {
-                MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_PORES
-                                                                     : ADD_PORES.get(currentTexture).get(axisFace);
-                if (newTexture != null) {
-                    newData = newTexture.getData();
-                }
-            } else if ((colour == DyeColor.BROWN && (CONFIG.ALLOW_TYPE_CHANGE || block.getType() == Material.HUGE_MUSHROOM_1)) ||
-                       (colour == DyeColor.RED && (CONFIG.ALLOW_TYPE_CHANGE || block.getType() == Material.HUGE_MUSHROOM_2))) {
-                if (CONFIG.ALLOW_TYPE_CHANGE) {
-                    newBlockType = (colour == DyeColor.BROWN) ? Material.HUGE_MUSHROOM_1 : Material.HUGE_MUSHROOM_2;
-                }
+        } else if (colour == DyeColor.YELLOW) {
+            MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_PORES
+                                                                 : ADD_PORES.get(currentTexture).get(axisFace);
+            if (newTexture != null) {
+                newData = newTexture.getData();
+            }
+        } else if ((colour == DyeColor.BROWN && (CONFIG.ALLOW_TYPE_CHANGE || block.getType() == Material.HUGE_MUSHROOM_1)) ||
+                   (colour == DyeColor.RED && (CONFIG.ALLOW_TYPE_CHANGE || block.getType() == Material.HUGE_MUSHROOM_2))) {
+            if (CONFIG.ALLOW_TYPE_CHANGE) {
+                newBlockType = (colour == DyeColor.BROWN) ? Material.HUGE_MUSHROOM_1 : Material.HUGE_MUSHROOM_2;
+            }
 
-                MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_CAP
-                                                                     : ADD_CAP.get(currentTexture).get(axisFace);
-                if (newTexture != null) {
-                    newData = newTexture.getData();
-                }
+            MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_CAP
+                                                                 : ADD_CAP.get(currentTexture).get(axisFace);
+            if (newTexture != null) {
+                newData = newTexture.getData();
             }
         }
 
@@ -153,7 +154,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         // block Material changed.
         if (newData >= 0 || oldBlockType != newBlockType) {
             // Set a valid data value if it has not changed.
-            if (newData == -1) {
+            if (newData < 0) {
                 newData = block.getData();
             }
 
@@ -165,6 +166,11 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
             block.setType(newBlockType);
             block.setData(newData);
             useOneItemInSurvival(player, slot, item);
+
+            if (CONFIG.DYE_SOUND != null) {
+                Location loc = block.getLocation();
+                loc.getWorld().playSound(loc, CONFIG.DYE_SOUND, CONFIG.DYE_VOLUME, CONFIG.DYE_PITCH);
+            }
         }
     }
 
@@ -296,7 +302,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         ADD_PORES.put(CAP_TOP, axisFaceTextures(ALL_PORES, null, null, null, null, null));
         ADD_PORES.put(CAP_WEST, axisFaceTextures(ALL_PORES, null, null, null, CAP_TOP, null));
         ADD_PORES.put(STEM_SIDES, axisFaceTextures(null, null, ALL_PORES, ALL_PORES, ALL_PORES, ALL_PORES));
-    };
+    }
 
     /**
      * Reference to WorldGuard.

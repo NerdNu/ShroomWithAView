@@ -1,1 +1,7 @@
 allow-type-change: false
+
+dye:
+  sound: ENTITY_ITEMFRAME_ROTATE_ITEM
+  volume: 1.0
+  pitch: 1.0
+
