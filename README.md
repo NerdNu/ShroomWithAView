@@ -24,13 +24,13 @@ The effect of dyes on mushroom blocks is as follows:
  * **bonemeal** on the side of the block will set all vertical faces to the
    stem texture; on the top or bottom face, it sets *all* faces to the stem
    texture.
- * **red dye** on a face will set that face to the the red cap texture if the
+ * **red dye** on a face will set that face to the red cap texture if the
    block is a red mushroom block, or if the configuration option to allow
    the mushroom type to be changed is set.
- * **brown dye** on a face will set that face to the the brown cap texture if
+ * **brown dye** on a face will set that face to the brown cap texture if
    the block is a brown mushroom block, or if the configuration option to allow
    the mushroom type to be changed is set.
- * **yellow dye** on a face will set that face to the the pore texture.
+ * **yellow dye** on a face will set that face to the pore texture.
  * *If the player is crouched* when they apply the dye, then all faces of the
    block will be set to the corresponding texture.
 
