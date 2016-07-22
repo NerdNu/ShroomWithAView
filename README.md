@@ -3,9 +3,12 @@ ShroomWithAView
 A Bukkit plugin that allows players to edit huge mushroom block face textures
 with dyes.
 
+`ShroomWithAView` also lets players use dye to set all sides of a log to
+its bark texture, or convert an all-bark log back to a regular log.
 
-Usage
------
+
+Usage With Mushroom Blocks
+--------------------------
 To change the colour of a mushroom block, players must right click on it with
 bonemeal or red, brown or yellow dye.  To change a mushroom's texture, the
 player must have permission to build in the current region (according to
@@ -33,6 +36,27 @@ The effect of dyes on mushroom blocks is as follows:
  * **yellow dye** on a face will set that face to the **pore** texture.
  * *If the player is crouched* when they apply the dye, then all faces of the
    block will be set to the corresponding texture.
+
+
+Usage With Logs
+---------------
+In order to edit log textures, players must have permission to build in the
+`WorldGuard` region containing the log.
+
+Right clicking any face of a log while holding an **ink sac** will turn it into
+an **all-bark** log, if it is not one already.
+
+Clicking any face of an all-bark log with **bonemeal** will turn the clicked
+face, and the face on the opposite side of the log, back to the **log rings**
+texture.
+
+
+Item Consumption
+----------------
+In SURVIVAL mode, one dye item will be consumed every time the clicked block's
+texture changes, or if the player is crouching when they click with the dye.
+
+In CREATIVE mode, the dye item is not consumed.
 
 
 Configuration

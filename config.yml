@@ -1,7 +1,6 @@
-allow-type-change: false
+allow-type-change: true
 
 dye:
-  sound: ENTITY_ITEMFRAME_ROTATE_ITEM
+  sound: BLOCK_WATERLILY_PLACE
   volume: 1.0
   pitch: 1.0
-

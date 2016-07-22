@@ -105,7 +105,12 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         }
 
         Block block = event.getClickedBlock();
-        if (block.getType() != Material.HUGE_MUSHROOM_1 && block.getType() != Material.HUGE_MUSHROOM_2) {
+        Material oldBlockType = block.getType();
+        boolean editingMushroom = oldBlockType == Material.HUGE_MUSHROOM_1 ||
+                                  oldBlockType == Material.HUGE_MUSHROOM_2;
+        boolean editingLog = oldBlockType == Material.LOG ||
+                             oldBlockType == Material.LOG_2;
+        if (!editingMushroom && !editingLog) {
             return;
         }
 
@@ -119,34 +124,43 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
 
         DyeColor colour = ((Dye) item.getData()).getColor();
         AxisFace axisFace = TO_AXIS_FACE.get(event.getBlockFace());
-        MushroomBlockTexture currentTexture = MushroomBlockTexture.getByData(block.getData());
-        Material oldBlockType = block.getType();
-        Material newBlockType = block.getType();
+        Material newBlockType = oldBlockType;
         byte newData = -1;
-        if (colour == DyeColor.WHITE) {
-            if ((axisFace == AxisFace.UP || axisFace == AxisFace.DOWN || player.isSneaking()) &&
-                currentTexture != ALL_STEM) {
-                newData = MushroomBlockTexture.ALL_STEM.getData();
-            } else if (currentTexture != MushroomBlockTexture.ALL_STEM &&
-                       currentTexture != MushroomBlockTexture.STEM_SIDES) {
-                newData = MushroomBlockTexture.STEM_SIDES.getData();
-            }
-        } else if (colour == DyeColor.YELLOW) {
-            MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_PORES
-                                                                 : ADD_PORES.get(currentTexture).get(axisFace);
-            if (newTexture != null) {
-                newData = newTexture.getData();
-            }
-        } else if ((colour == DyeColor.BROWN && (CONFIG.ALLOW_TYPE_CHANGE || block.getType() == Material.HUGE_MUSHROOM_1)) ||
-                   (colour == DyeColor.RED && (CONFIG.ALLOW_TYPE_CHANGE || block.getType() == Material.HUGE_MUSHROOM_2))) {
-            if (CONFIG.ALLOW_TYPE_CHANGE) {
-                newBlockType = (colour == DyeColor.BROWN) ? Material.HUGE_MUSHROOM_1 : Material.HUGE_MUSHROOM_2;
-            }
 
-            MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_CAP
-                                                                 : ADD_CAP.get(currentTexture).get(axisFace);
-            if (newTexture != null) {
-                newData = newTexture.getData();
+        if (editingMushroom) {
+            MushroomBlockTexture currentTexture = MushroomBlockTexture.getByData(block.getData());
+            if (colour == DyeColor.WHITE) {
+                if ((axisFace == AxisFace.UP || axisFace == AxisFace.DOWN || player.isSneaking()) &&
+                    currentTexture != ALL_STEM) {
+                    newData = MushroomBlockTexture.ALL_STEM.getData();
+                } else if (currentTexture != MushroomBlockTexture.ALL_STEM &&
+                           currentTexture != MushroomBlockTexture.STEM_SIDES) {
+                    newData = MushroomBlockTexture.STEM_SIDES.getData();
+                }
+            } else if (colour == DyeColor.YELLOW) {
+                MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_PORES
+                                                                     : ADD_PORES.get(currentTexture).get(axisFace);
+                if (newTexture != null) {
+                    newData = newTexture.getData();
+                }
+            } else if ((colour == DyeColor.BROWN && (CONFIG.ALLOW_TYPE_CHANGE || block.getType() == Material.HUGE_MUSHROOM_1)) ||
+                       (colour == DyeColor.RED && (CONFIG.ALLOW_TYPE_CHANGE || block.getType() == Material.HUGE_MUSHROOM_2))) {
+                if (CONFIG.ALLOW_TYPE_CHANGE) {
+                    newBlockType = (colour == DyeColor.BROWN) ? Material.HUGE_MUSHROOM_1 : Material.HUGE_MUSHROOM_2;
+                }
+
+                MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_CAP
+                                                                     : ADD_CAP.get(currentTexture).get(axisFace);
+                if (newTexture != null) {
+                    newData = newTexture.getData();
+                }
+            }
+        } else { // Editing a log. Only consume dye if change is possible.
+            byte oldData = block.getData();
+            if (colour == DyeColor.BLACK && (oldData & 0xC) != 0xC) {
+                newData = (byte) (oldData | 0xC);
+            } else if (colour == DyeColor.WHITE && (oldData & 0xC) == 0xC) {
+                newData = (byte) ((oldData & 0x3) | TO_LOG_BITS.get(axisFace));
             }
         }
 
@@ -246,6 +260,20 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         TO_AXIS_FACE.put(BlockFace.NORTH, AxisFace.NORTH);
         TO_AXIS_FACE.put(BlockFace.WEST, AxisFace.WEST);
         TO_AXIS_FACE.put(BlockFace.SOUTH, AxisFace.SOUTH);
+    }
+
+    /**
+     * Look up table mapping clicked AxisFace constants to the value of bits 2
+     * and 3 of the data nybble that encodes the orientation of a log.
+     */
+    static final EnumMap<AxisFace, Integer> TO_LOG_BITS = new EnumMap<AxisFace, Integer>(AxisFace.class);
+    static {
+        TO_LOG_BITS.put(AxisFace.UP, 0x0);
+        TO_LOG_BITS.put(AxisFace.DOWN, 0x0);
+        TO_LOG_BITS.put(AxisFace.EAST, 0x4);
+        TO_LOG_BITS.put(AxisFace.NORTH, 0x8);
+        TO_LOG_BITS.put(AxisFace.WEST, 0x4);
+        TO_LOG_BITS.put(AxisFace.SOUTH, 0x8);
     }
 
     /**
