@@ -110,7 +110,8 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
                                   oldBlockType == Material.HUGE_MUSHROOM_2;
         boolean editingLog = oldBlockType == Material.LOG ||
                              oldBlockType == Material.LOG_2;
-        if (!editingMushroom && !editingLog) {
+        boolean editingDoubleStep = oldBlockType == Material.DOUBLE_STEP;
+        if (!editingMushroom && !editingLog && !editingDoubleStep) {
             return;
         }
 
@@ -125,10 +126,11 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         DyeColor colour = ((Dye) item.getData()).getColor();
         AxisFace axisFace = TO_AXIS_FACE.get(event.getBlockFace());
         Material newBlockType = oldBlockType;
-        byte newData = -1;
+        byte oldData = block.getData();
+        byte newData = oldData;
 
         if (editingMushroom) {
-            MushroomBlockTexture currentTexture = MushroomBlockTexture.getByData(block.getData());
+            MushroomBlockTexture currentTexture = MushroomBlockTexture.getByData(oldData);
             if (colour == DyeColor.WHITE) {
                 if ((axisFace == AxisFace.UP || axisFace == AxisFace.DOWN || player.isSneaking()) &&
                     currentTexture != ALL_STEM) {
@@ -155,26 +157,26 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
                     newData = newTexture.getData();
                 }
             }
-        } else { // Editing a log. Only consume dye if change is possible.
-            byte oldData = block.getData();
-            if (colour == DyeColor.BLACK && (oldData & 0xC) != 0xC) {
-                newData = (byte) (oldData | 0xC);
-            } else if (colour == DyeColor.WHITE && (oldData & 0xC) == 0xC) {
-                newData = (byte) ((oldData & 0x3) | TO_LOG_BITS.get(axisFace));
+        } else if (colour == DyeColor.WHITE) {
+            if (editingLog) {
+                if ((oldData & 0xC) != 0xC) {
+                    newData = (byte) (oldData | 0xC);
+                } else if ((oldData & 0xC) == 0xC) {
+                    newData = (byte) ((oldData & 0x3) | TO_LOG_BITS.get(axisFace));
+                }
+            } else { // if (editingDoubleStep)
+                if ((oldData & 3) < 2) {
+                    newData ^= 8;
+                }
             }
         }
 
         // Only log and edit and consume the item if either the data value or
         // block Material changed.
-        if (newData >= 0 || oldBlockType != newBlockType) {
-            // Set a valid data value if it has not changed.
-            if (newData < 0) {
-                newData = block.getData();
-            }
-
+        if (oldData != newData || oldBlockType != newBlockType) {
             Actor actor = Actor.actorFromEntity(player);
             _logBlock.getConsumer().queueBlockReplace(actor, block.getLocation(),
-                                                      block.getTypeId(), block.getData(),
+                                                      block.getTypeId(), oldData,
                                                       newBlockType.getId(), newData);
 
             block.setType(newBlockType);

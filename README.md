@@ -3,16 +3,20 @@ ShroomWithAView
 A Bukkit plugin that allows players to edit huge mushroom block face textures
 with dyes.
 
-`ShroomWithAView` also lets players use dye to set all sides of a log to
-its bark texture, or convert an all-bark log back to a regular log.
+`ShroomWithAView` also lets players use bonemeal to set all sides of a log
+to its bark texture, or back to a regular log.  Players can also use bonemeal
+to switch stone and sandstone double slabs between their stacked and seamless
+textures.
+
+In order to edit block textures, players must have permission to build in the
+`WorldGuard` region containing the block.  Changes are logged using
+`LogBlock`.
 
 
 Usage With Mushroom Blocks
 --------------------------
 To change the colour of a mushroom block, players must right click on it with
-bonemeal or red, brown or yellow dye.  To change a mushroom's texture, the
-player must have permission to build in the current region (according to
-`WorldGuard`).  Changes are automatically logged using `LogBlock`.
+bonemeal or red, brown or yellow dye.
 
 `ShroomWithAView` will *at least* change the colour of the face of the
 mushroom block that was clicked.  The plugin may have to change the colour of
@@ -40,15 +44,18 @@ The effect of dyes on mushroom blocks is as follows:
 
 Usage With Logs
 ---------------
-In order to edit log textures, players must have permission to build in the
-`WorldGuard` region containing the log.
-
-Right clicking any face of a log while holding an **ink sac** will turn it into
+Right clicking any face of a log while holding **bonemeal** will turn it into
 an **all-bark** log, if it is not one already.
 
 Clicking any face of an all-bark log with **bonemeal** will turn the clicked
-face, and the face on the opposite side of the log, back to the **log rings**
+face, and the face on the opposite side of the log, back to the **growth rings**
 texture.
+
+
+Usage With Stone and Sandstone Double Slabs
+-------------------------------------------
+Right clicking any face of a smooth stone or sandstone double slab block will
+toggle it's texture between the divided and seamless textures.
 
 
 Item Consumption
