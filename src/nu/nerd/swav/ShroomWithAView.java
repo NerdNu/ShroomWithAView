@@ -44,7 +44,7 @@ import de.diddiz.LogBlock.LogBlock;
 
 // ----------------------------------------------------------------------------
 /**
- * Allow players to edit huge mushroom blocks with dyes.
+ * Allow players to edit huge mushroom blocks, logs and double slabs with dyes.
  */
 public class ShroomWithAView extends JavaPlugin implements Listener {
     /**
@@ -110,7 +110,8 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
                                   oldBlockType == Material.HUGE_MUSHROOM_2;
         boolean editingLog = oldBlockType == Material.LOG ||
                              oldBlockType == Material.LOG_2;
-        boolean editingDoubleStep = oldBlockType == Material.DOUBLE_STEP;
+        boolean editingDoubleStep = oldBlockType == Material.DOUBLE_STEP ||
+                                    oldBlockType == Material.DOUBLE_STONE_SLAB2;
         if (!editingMushroom && !editingLog && !editingDoubleStep) {
             return;
         }
