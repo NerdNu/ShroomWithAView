@@ -3,12 +3,12 @@ package nu.nerd.swav;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 /**
  * Interface abstracting the operations of the block edit logging plugin.
  * 
- * The main purpose of this is to allow classes to be compiled even if the
- * LogBlock plugin is unavailable.
+ * The main purpose of this is to allow classes to be dynamically compiled even
+ * if the LogBlock plugin is unavailable.
  */
 public interface ILogger {
     /**
