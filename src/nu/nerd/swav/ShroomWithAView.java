@@ -35,12 +35,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Dye;
 import org.bukkit.material.types.MushroomBlockTexture;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-
-import de.diddiz.LogBlock.Actor;
-import de.diddiz.LogBlock.LogBlock;
 
 // ----------------------------------------------------------------------------
 /**
@@ -69,7 +67,11 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         CONFIG.reload();
 
         _worldGuard = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
-        _logBlock = (LogBlock) getServer().getPluginManager().getPlugin("LogBlock");
+        Plugin logBlock = Bukkit.getServer().getPluginManager().getPlugin("LogBlock");
+        if (logBlock != null) {
+            _logger = new LogBlockLogger(logBlock);
+        }
+
         Bukkit.getPluginManager().registerEvents(this, this);
     }
 
@@ -119,7 +121,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         EquipmentSlot slot = event.getHand();
         ItemStack item = (slot == EquipmentSlot.HAND) ? player.getEquipment().getItemInMainHand()
-                                                     : player.getEquipment().getItemInOffHand();
+                                                      : player.getEquipment().getItemInOffHand();
         if (item.getType() != Material.INK_SACK || !_worldGuard.canBuild(player, block.getLocation())) {
             return;
         }
@@ -142,7 +144,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
                 }
             } else if (colour == DyeColor.YELLOW) {
                 MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_PORES
-                                                                     : ADD_PORES.get(currentTexture).get(axisFace);
+                                                                      : ADD_PORES.get(currentTexture).get(axisFace);
                 if (newTexture != null) {
                     newData = newTexture.getData();
                 }
@@ -153,7 +155,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
                 }
 
                 MushroomBlockTexture newTexture = player.isSneaking() ? MushroomBlockTexture.ALL_CAP
-                                                                     : ADD_CAP.get(currentTexture).get(axisFace);
+                                                                      : ADD_CAP.get(currentTexture).get(axisFace);
                 if (newTexture != null) {
                     newData = newTexture.getData();
                 }
@@ -175,10 +177,11 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         // Only log and edit and consume the item if either the data value or
         // block Material changed.
         if (oldData != newData || oldBlockType != newBlockType) {
-            Actor actor = Actor.actorFromEntity(player);
-            _logBlock.getConsumer().queueBlockReplace(actor, block.getLocation(),
-                                                      block.getTypeId(), oldData,
-                                                      newBlockType.getId(), newData);
+            if (_logger != null) {
+                _logger.logBlockReplace(player, block.getLocation(),
+                                        block.getTypeId(), oldData,
+                                        newBlockType.getId(), newData);
+            }
 
             block.setType(newBlockType);
             block.setData(newData);
@@ -230,10 +233,9 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
      * @param west the texture to set when the west facing face is clicked.
      * @param south the texture to set when the south facing face is clicked.
      */
-    protected static EnumMap<AxisFace, MushroomBlockTexture>
-    axisFaceTextures(MushroomBlockTexture up, MushroomBlockTexture down,
-                     MushroomBlockTexture east, MushroomBlockTexture north,
-                     MushroomBlockTexture west, MushroomBlockTexture south) {
+    protected static EnumMap<AxisFace, MushroomBlockTexture> axisFaceTextures(MushroomBlockTexture up, MushroomBlockTexture down,
+                                                                              MushroomBlockTexture east, MushroomBlockTexture north,
+                                                                              MushroomBlockTexture west, MushroomBlockTexture south) {
         EnumMap<AxisFace, MushroomBlockTexture> result = new EnumMap<AxisFace, MushroomBlockTexture>(AxisFace.class);
         result.put(AxisFace.UP, up);
         result.put(AxisFace.DOWN, down);
@@ -286,8 +288,8 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
      * The first index is the current texture, and the second index is the
      * AxisFace index. If there is no change, the entry is null.
      */
-    static private final EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>> ADD_CAP =
-    new EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>>(MushroomBlockTexture.class);
+    static private final EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>> ADD_CAP = new EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>>(
+        MushroomBlockTexture.class);
     static {
         // -------- Current ---- UP -- DOWN -- EAST -- NORTH -- WEST -- SOUTH
         ADD_CAP.put(ALL_CAP, axisFaceTextures(null, null, null, null, null, null));
@@ -316,8 +318,8 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
      * faces as possible, favouring north and west faces when several solutions
      * are possible.
      */
-    static private final EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>> ADD_PORES =
-    new EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>>(MushroomBlockTexture.class);
+    static private final EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>> ADD_PORES = new EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>>(
+        MushroomBlockTexture.class);
     static {
         // -------- Current ---- UP -- DOWN -- EAST -- NORTH -- WEST -- SOUTH
         ADD_PORES.put(ALL_CAP, axisFaceTextures(ALL_PORES, CAP_NORTH_WEST, CAP_NORTH_WEST, CAP_SOUTH_WEST, CAP_NORTH_EAST, CAP_NORTH_WEST));
@@ -341,7 +343,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
     protected WorldGuardPlugin _worldGuard;
 
     /**
-     * Reference to LogBlock.
+     * Block edit logging implementation.
      */
-    protected LogBlock _logBlock;
+    protected ILogger _logger;
 } // class ShroomWithAView

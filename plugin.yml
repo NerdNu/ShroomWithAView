@@ -6,7 +6,8 @@ description: ${project.description}
 website: ${project.url}
 main: nu.nerd.swav.ShroomWithAView
 
-depend: [WorldGuard, LogBlock]
+depend: [WorldGuard]
+softdepend: [LogBlock]
 
 permissions:
   shroomwithaview.admin:
