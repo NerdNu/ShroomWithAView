@@ -67,11 +67,15 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         Plugin worldGuard = getServer().getPluginManager().getPlugin("WorldGuard");
         if (worldGuard != null) {
             _protector = new WorldGuardProtector(worldGuard);
+        } else {
+            getLogger().warning("WorldGuard is not available. Players can edit textures anywhere!");
         }
 
         Plugin logBlock = getServer().getPluginManager().getPlugin("LogBlock");
         if (logBlock != null) {
             _logger = new LogBlockLogger(logBlock);
+        } else {
+            getLogger().warning("LogBlock is not available. Textures editing will not be logged!");
         }
 
         Bukkit.getPluginManager().registerEvents(this, this);
