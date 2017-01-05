@@ -38,8 +38,6 @@ import org.bukkit.material.types.MushroomBlockTexture;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-
 // ----------------------------------------------------------------------------
 /**
  * Allow players to edit huge mushroom blocks, logs and double slabs with dyes.
@@ -66,8 +64,12 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         saveDefaultConfig();
         CONFIG.reload();
 
-        _worldGuard = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
-        Plugin logBlock = Bukkit.getServer().getPluginManager().getPlugin("LogBlock");
+        Plugin worldGuard = getServer().getPluginManager().getPlugin("WorldGuard");
+        if (worldGuard != null) {
+            _protector = new WorldGuardProtector(worldGuard);
+        }
+
+        Plugin logBlock = getServer().getPluginManager().getPlugin("LogBlock");
         if (logBlock != null) {
             _logger = new LogBlockLogger(logBlock);
         }
@@ -122,7 +124,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         EquipmentSlot slot = event.getHand();
         ItemStack item = (slot == EquipmentSlot.HAND) ? player.getEquipment().getItemInMainHand()
                                                       : player.getEquipment().getItemInOffHand();
-        if (item.getType() != Material.INK_SACK || !_worldGuard.canBuild(player, block.getLocation())) {
+        if (item.getType() != Material.INK_SACK || (_protector != null && !_protector.canBuild(player, block.getLocation()))) {
             return;
         }
 
@@ -338,9 +340,9 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
     }
 
     /**
-     * Reference to WorldGuard.
+     * Block protection implementation.
      */
-    protected WorldGuardPlugin _worldGuard;
+    protected IProtector _protector;
 
     /**
      * Block edit logging implementation.
