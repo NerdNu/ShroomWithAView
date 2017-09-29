@@ -4,7 +4,7 @@
 	<groupId>nu.nerd</groupId>
 	<name>ShroomWithAView</name>
 	<artifactId>${project.name}</artifactId>
-	<version>1.5.0</version>
+	<version>1.6.0</version>
 	<packaging>jar</packaging>
 	<description>Allow players to edit huge mushroom block face textures with dyes.</description>
 	<url>https://github.com/totemo/${project.name}</url>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.9-R0.1-SNAPSHOT</version>
+			<version>1.11-R0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sk89q</groupId>

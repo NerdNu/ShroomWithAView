@@ -14,7 +14,9 @@ import static org.bukkit.material.types.MushroomBlockTexture.CAP_TOP;
 import static org.bukkit.material.types.MushroomBlockTexture.CAP_WEST;
 import static org.bukkit.material.types.MushroomBlockTexture.STEM_SIDES;
 
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.HashSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -120,7 +122,9 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
                              oldBlockType == Material.LOG_2;
         boolean editingDoubleStep = oldBlockType == Material.DOUBLE_STEP ||
                                     oldBlockType == Material.DOUBLE_STONE_SLAB2;
-        if (!editingMushroom && !editingLog && !editingDoubleStep) {
+        boolean editingShulkerBox = CONFIG.ALLOW_ROTATE_SHULKER_BOX &&
+                                    SHULKER_BOX_MATERIALS.contains(oldBlockType);
+        if (!editingMushroom && !editingLog && !editingDoubleStep && !editingShulkerBox) {
             return;
         }
 
@@ -173,9 +177,19 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
                 } else if ((oldData & 0xC) == 0xC) {
                     newData = (byte) ((oldData & 0x3) | TO_LOG_BITS.get(axisFace));
                 }
-            } else { // if (editingDoubleStep)
+            } else if (editingDoubleStep) {
                 if ((oldData & 3) < 2) {
                     newData ^= 8;
+                }
+            } else if (editingShulkerBox) {
+                byte clickedFaceData = AXIS_FACE_TO_SHULKER_DATA.get(axisFace);
+                // Shulker box data values cycle modulo 6.
+                byte normalisedOldData = (byte) (oldData % 6);
+                if (clickedFaceData == normalisedOldData) {
+                    // Opposite face simply toggles bit 0.
+                    newData = (byte) (normalisedOldData ^ 1);
+                } else {
+                    newData = clickedFaceData;
                 }
             }
         }
@@ -263,7 +277,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
     /**
      * Look up table mapping BlockFace constants to AxisFaces.
      */
-    static final EnumMap<BlockFace, AxisFace> TO_AXIS_FACE = new EnumMap<BlockFace, AxisFace>(BlockFace.class);
+    private static final EnumMap<BlockFace, AxisFace> TO_AXIS_FACE = new EnumMap<>(BlockFace.class);
     static {
         TO_AXIS_FACE.put(BlockFace.UP, AxisFace.UP);
         TO_AXIS_FACE.put(BlockFace.DOWN, AxisFace.DOWN);
@@ -277,7 +291,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
      * Look up table mapping clicked AxisFace constants to the value of bits 2
      * and 3 of the data nybble that encodes the orientation of a log.
      */
-    static final EnumMap<AxisFace, Integer> TO_LOG_BITS = new EnumMap<AxisFace, Integer>(AxisFace.class);
+    private static final EnumMap<AxisFace, Integer> TO_LOG_BITS = new EnumMap<>(AxisFace.class);
     static {
         TO_LOG_BITS.put(AxisFace.UP, 0x0);
         TO_LOG_BITS.put(AxisFace.DOWN, 0x0);
@@ -294,8 +308,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
      * The first index is the current texture, and the second index is the
      * AxisFace index. If there is no change, the entry is null.
      */
-    static private final EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>> ADD_CAP = new EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>>(
-        MushroomBlockTexture.class);
+    private static final EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>> ADD_CAP = new EnumMap<>(MushroomBlockTexture.class);
     static {
         // -------- Current ---- UP -- DOWN -- EAST -- NORTH -- WEST -- SOUTH
         ADD_CAP.put(ALL_CAP, axisFaceTextures(null, null, null, null, null, null));
@@ -324,8 +337,7 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
      * faces as possible, favouring north and west faces when several solutions
      * are possible.
      */
-    static private final EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>> ADD_PORES = new EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>>(
-        MushroomBlockTexture.class);
+    private static final EnumMap<MushroomBlockTexture, EnumMap<AxisFace, MushroomBlockTexture>> ADD_PORES = new EnumMap<>(MushroomBlockTexture.class);
     static {
         // -------- Current ---- UP -- DOWN -- EAST -- NORTH -- WEST -- SOUTH
         ADD_PORES.put(ALL_CAP, axisFaceTextures(ALL_PORES, CAP_NORTH_WEST, CAP_NORTH_WEST, CAP_SOUTH_WEST, CAP_NORTH_EAST, CAP_NORTH_WEST));
@@ -341,6 +353,29 @@ public class ShroomWithAView extends JavaPlugin implements Listener {
         ADD_PORES.put(CAP_TOP, axisFaceTextures(ALL_PORES, null, null, null, null, null));
         ADD_PORES.put(CAP_WEST, axisFaceTextures(ALL_PORES, null, null, null, CAP_TOP, null));
         ADD_PORES.put(STEM_SIDES, axisFaceTextures(null, null, ALL_PORES, ALL_PORES, ALL_PORES, ALL_PORES));
+    }
+
+    /**
+     * The set of all Materials that are shulker boxes.
+     */
+    private static final HashSet<Material> SHULKER_BOX_MATERIALS = new HashSet<>(
+        Arrays.asList(Material.BLACK_SHULKER_BOX, Material.BLUE_SHULKER_BOX, Material.BROWN_SHULKER_BOX, Material.CYAN_SHULKER_BOX,
+                      Material.GRAY_SHULKER_BOX, Material.GREEN_SHULKER_BOX, Material.LIGHT_BLUE_SHULKER_BOX, Material.LIME_SHULKER_BOX,
+                      Material.MAGENTA_SHULKER_BOX, Material.ORANGE_SHULKER_BOX, Material.PINK_SHULKER_BOX, Material.PURPLE_SHULKER_BOX,
+                      Material.RED_SHULKER_BOX, Material.SILVER_SHULKER_BOX, Material.WHITE_SHULKER_BOX, Material.YELLOW_SHULKER_BOX));
+
+    /**
+     * Map from AxisFace to data value of shulker box with base spiral texture
+     * on that face.
+     */
+    private static final EnumMap<AxisFace, Byte> AXIS_FACE_TO_SHULKER_DATA = new EnumMap<>(AxisFace.class);
+    static {
+        AXIS_FACE_TO_SHULKER_DATA.put(AxisFace.UP, (byte) 0);
+        AXIS_FACE_TO_SHULKER_DATA.put(AxisFace.DOWN, (byte) 1);
+        AXIS_FACE_TO_SHULKER_DATA.put(AxisFace.SOUTH, (byte) 2);
+        AXIS_FACE_TO_SHULKER_DATA.put(AxisFace.NORTH, (byte) 3);
+        AXIS_FACE_TO_SHULKER_DATA.put(AxisFace.EAST, (byte) 4);
+        AXIS_FACE_TO_SHULKER_DATA.put(AxisFace.WEST, (byte) 5);
     }
 
     /**

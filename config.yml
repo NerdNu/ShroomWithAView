@@ -1,4 +1,5 @@
 allow-type-change: true
+allow-rotate-shulker-box: true
 
 dye:
   sound: BLOCK_WATERLILY_PLACE

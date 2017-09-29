@@ -1,6 +1,7 @@
 package nu.nerd.swav;
 
 import org.bukkit.Sound;
+import org.bukkit.configuration.file.FileConfiguration;
 
 // ----------------------------------------------------------------------------
 /**
@@ -12,6 +13,11 @@ public class Configuration {
      * brown.
      */
     public boolean ALLOW_TYPE_CHANGE;
+
+    /**
+     * If true, allow bonemeal to rotate a shulker box.
+     */
+    public boolean ALLOW_ROTATE_SHULKER_BOX;
 
     /**
      * Sound of dye being applied.
@@ -34,10 +40,12 @@ public class Configuration {
      */
     public void reload() {
         ShroomWithAView.PLUGIN.reloadConfig();
-        ALLOW_TYPE_CHANGE = ShroomWithAView.PLUGIN.getConfig().getBoolean("allow-type-change");
+        FileConfiguration config = ShroomWithAView.PLUGIN.getConfig();
+        ALLOW_TYPE_CHANGE = config.getBoolean("allow-type-change");
+        ALLOW_ROTATE_SHULKER_BOX = config.getBoolean("allow-rotate-shulker-box");
         DYE_SOUND = loadSound("dye.sound", "dye sound");
-        DYE_VOLUME = (float) ShroomWithAView.PLUGIN.getConfig().getDouble("dye.volume");
-        DYE_PITCH = (float) ShroomWithAView.PLUGIN.getConfig().getDouble("dye.pitch");
+        DYE_VOLUME = (float) config.getDouble("dye.volume");
+        DYE_PITCH = (float) config.getDouble("dye.pitch");
     }
 
     // ------------------------------------------------------------------------

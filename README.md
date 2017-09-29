@@ -3,10 +3,14 @@ ShroomWithAView
 A Bukkit plugin that allows players to edit huge mushroom block face textures
 with dyes.
 
-`ShroomWithAView` also lets players use bonemeal to set all sides of a log
-to its bark texture, or back to a regular log.  Players can also use bonemeal
-to switch stone and sandstone double slabs between their stacked and seamless
-textures.
+`ShroomWithAView` also lets players use bonemeal to:
+
+ * set all sides of a log to its bark texture, or back to a 
+   regular log,
+ * switch stone and sandstone double slabs between their stacked and seamless
+   textures.
+ * rotate the base (spiral texture) of shulker boxes to the face that was 
+   clicked, or the opposite face if the clicked face is already the base.
 
 In order to edit block textures, players must have permission to build in the
 `WorldGuard` region containing the block.  Changes are logged using
@@ -54,8 +58,21 @@ texture.
 
 Usage With Stone and Sandstone Double Slabs
 -------------------------------------------
-Right clicking any face of a smooth stone or sandstone double slab block will
-toggle it's texture between the divided and seamless textures.
+Right clicking any face of a smooth stone or sandstone double slab block with
+**bonemeal** will toggle it's texture between the divided and seamless textures.
+
+
+Usage With Shulker Boxes
+------------------------
+Right clicking any face of a shulker box with **bonemeal** will rotate the box
+so that the face is the base (bottom) of the box. If the clicked face is
+_already_ the base, the box will rotate so that the _opposite_ face is the base.
+
+To avoid opening the shulker box when rotating it, crouch while clicking.
+
+NOTE: Occasionally, shulker boxes can get stuck in the open position. This is
+probably just a client-side visual glitch. The problem goes away on server
+restart, or possibly on relog.
 
 
 Item Consumption
@@ -70,6 +87,8 @@ Configuration
 -------------
  * `allow-type-change` - If true, dyes can change the type of a mushroom
    block between red and brown.
+ * `allow-rotate-shulker-box` - If true, shulker boxes can be rotated by 
+   right clicking on them with bonemeal.
  * `dye.sound` - Name of [Sound](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html)
    to play when dye is placed, or NONE for silence.
  * `dye.volume` - Sound volume. Sound range is this value multiplied by 15 blocks.
